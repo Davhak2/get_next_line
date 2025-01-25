@@ -1,16 +1,4 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: luminous <luminous@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/24 14:09:41 by davihako          #+#    #+#             */
-/*   Updated: 2025/01/26 02:04:12 by luminous         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 char	*free_buff(char *buff1, char *buff2)
 {
@@ -110,38 +98,15 @@ char	*read_file(int fd, char *res)
 
 char	*get_next_line(int fd)
 {
-	static char	*buff;
+	static char	*buff[MAX_FD];
 	char		*line;
 
 	if (BUFFER_SIZE <= 0 || fd < 0)
 		return (NULL);
-	buff = read_file(fd, buff);
-	if (!buff)
+	buff[fd] = read_file(fd, buff[fd]);
+	if (!buff[fd])
 		return (NULL);
-	line = buff_line(buff);
-	buff = next(buff);
+	line = buff_line(buff[fd]);
+	buff[fd] = next(buff[fd]);
 	return (line);
 }
-
-/*#include <fcntl.h>
-#include <stdio.h>
-
-int	main(void)
-{
-	int		fd;
-	char	*line;
-
-	fd = open("file.txt", O_RDONLY);
-	if (fd == -1)
-	{
-		printf("Error opening file\n");
-		return (1);
-	}
-	while ((line = get_next_line(fd)))
-	{
-		printf("%s", line);
-		free(line);
-	}
-	close(fd);
-	return (0);
-}*/
