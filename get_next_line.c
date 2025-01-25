@@ -6,7 +6,7 @@
 /*   By: luminous <luminous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/24 14:09:41 by davihako          #+#    #+#             */
-/*   Updated: 2025/01/26 00:43:18 by luminous         ###   ########.fr       */
+/*   Updated: 2025/01/26 01:58:33 by luminous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,11 @@ char	*free_buff(char *buff1, char *buff2)
 	char	*res;
 
 	res = ft_strjoin(buff1, buff2);
+	if (!res)
+	{
+		free(buff1);
+		return (NULL);
+	}
 	free(buff1);
 	return (res);
 }
@@ -39,11 +44,15 @@ char	*next(char *buff)
 	}
 	line = ft_calloc(ft_strlen(buff) - i, sizeof(char));
 	if (!line)
+	{
+		free(buff);
 		return (NULL);
+	}
 	i++;
 	j = 0;
 	while (buff[i])
 		line[j++] = buff[i++];
+	line[j] = '\0';
 	free(buff);
 	return (line);
 }
@@ -70,6 +79,7 @@ char	*buff_line(char *buff)
 	}
 	if (buff[count] == '\n')
 		res[count] = '\n';
+	res[count + 1] = '\0';
 	return (res);
 }
 
@@ -93,7 +103,7 @@ char	*read_file(int fd, char *res)
 		bytes = read(fd, buff, BUFFER_SIZE);
 	}
 	free(buff);
-	if (bytes == 0 && res[0] == '\0')
+	if (bytes < 0 || !res[0])
 	{
 		free(res);
 		return (NULL);
@@ -106,7 +116,7 @@ char	*get_next_line(int fd)
 	static char	*buff;
 	char		*line;
 
-	if (BUFFER_SIZE <= 0 || fd < 0 || read(fd, 0, 0) < 0)
+	if (BUFFER_SIZE <= 0 || fd < 0)
 		return (NULL);
 	buff = read_file(fd, buff);
 	if (!buff)
@@ -116,8 +126,7 @@ char	*get_next_line(int fd)
 	return (line);
 }
 
-
-#include <fcntl.h>
+/*#include <fcntl.h>
 #include <stdio.h>
 
 int	main(void)
@@ -138,4 +147,4 @@ int	main(void)
 	}
 	close(fd);
 	return (0);
-}
+}*/
