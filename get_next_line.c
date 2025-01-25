@@ -3,16 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: davihako <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: luminous <luminous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/24 14:09:41 by davihako          #+#    #+#             */
-/*   Updated: 2025/01/25 21:35:57 by davihako         ###   ########.fr       */
+/*   Updated: 2025/01/26 00:43:18 by luminous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
+#include <stdlib.h>
+#include <unistd.h>
 
-char	*free_buff(char	*buff1, char *buff2)
+char	*free_buff(char *buff1, char *buff2)
 {
 	char	*res;
 
@@ -35,7 +37,9 @@ char	*next(char *buff)
 		free(buff);
 		return (NULL);
 	}
-	line = ft_calloc((ft_strlen(buff) - i + 1), sizeof(char));
+	line = ft_calloc(ft_strlen(buff) - i, sizeof(char));
+	if (!line)
+		return (NULL);
 	i++;
 	j = 0;
 	while (buff[i])
@@ -50,16 +54,21 @@ char	*buff_line(char *buff)
 	char	*res;
 
 	count = 0;
-	while(buff[count] && buff[count] != '\n')
+	while (buff[count] && buff[count] != '\n')
 		count++;
-	res = ft_calloc(count + 2, 1);
+	if (buff[count] == '\n')
+		res = ft_calloc(count + 2, sizeof(char));
+	else
+		res = ft_calloc(count + 1, sizeof(char));
+	if (!res)
+		return (NULL);
 	count = 0;
 	while (buff[count] && buff[count] != '\n')
 	{
 		res[count] = buff[count];
 		count++;
 	}
-	if (buff[count] && buff[count] == '\n')
+	if (buff[count] == '\n')
 		res[count] = '\n';
 	return (res);
 }
@@ -70,23 +79,25 @@ char	*read_file(int fd, char *res)
 	int		bytes;
 
 	if (!res)
-		ft_calloc(1, 1);
-	buff = ft_calloc(BUFFER_SIZE, 1);
+		res = ft_calloc(1, sizeof(char));
+	buff = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
+	if (!buff)
+		return (NULL);
 	bytes = read(fd, buff, BUFFER_SIZE);
-	while (bytes)
+	while (bytes > 0)
 	{
-		if (!bytes)
-		{
-			free(buff);
-			return (NULL);
-		}
 		buff[bytes] = '\0';
 		res = free_buff(res, buff);
-		bytes = read(fd, buff, BUFFER_SIZE);
 		if (ft_strchr(buff, '\n'))
 			break ;
+		bytes = read(fd, buff, BUFFER_SIZE);
 	}
 	free(buff);
+	if (bytes == 0 && res[0] == '\0')
+	{
+		free(res);
+		return (NULL);
+	}
 	return (res);
 }
 
@@ -95,7 +106,7 @@ char	*get_next_line(int fd)
 	static char	*buff;
 	char		*line;
 
-	if (BUFFER_SIZE <= 0|| fd == -1 || read(fd, 0, 0) < 0)
+	if (BUFFER_SIZE <= 0 || fd < 0 || read(fd, 0, 0) < 0)
 		return (NULL);
 	buff = read_file(fd, buff);
 	if (!buff)
@@ -105,10 +116,26 @@ char	*get_next_line(int fd)
 	return (line);
 }
 
+
 #include <fcntl.h>
 #include <stdio.h>
 
-int main(){
-	int fd = open("file.txt", O_RDONLY);
-	printf("%s", get_next_line(fd));
+int	main(void)
+{
+	int		fd;
+	char	*line;
+
+	fd = open("file.txt", O_RDONLY);
+	if (fd == -1)
+	{
+		printf("Error opening file\n");
+		return (1);
+	}
+	while ((line = get_next_line(fd)))
+	{
+		printf("%s", line);
+		free(line);
+	}
+	close(fd);
+	return (0);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line_utils.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: davihako <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: luminous <luminous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/24 14:07:54 by davihako          #+#    #+#             */
-/*   Updated: 2025/01/25 21:43:40 by davihako         ###   ########.fr       */
+/*   Updated: 2025/01/25 23:55:53 by luminous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@ char	*ft_strchr(const char *s, int c)
 	size_t	s_len;
 	char	letter;
 
+	if (!s)
+		return (NULL);
 	letter = (char)c;
 	s_len = ft_strlen(s) + 1;
 	while (s_len--)
@@ -32,6 +34,8 @@ size_t	ft_strlen(const char *str)
 {
 	const char	*str1;
 
+	if (!str)
+		return (0);
 	str1 = str;
 	while (*str)
 		str++;
@@ -40,23 +44,25 @@ size_t	ft_strlen(const char *str)
 
 char	*ft_strjoin(const char *s1, const char *s2)
 {
-	int		i;
 	int		size;
 	char	*res;
 	char	*start;
 
-	i = 0;
+	if (!s1 && !s2)
+		return (NULL);
 	size = ft_strlen(s1) + ft_strlen(s2);
 	res = malloc(sizeof(char) * (size + 1));
-	start = res;
-	if (!res || !s1 || !s2)
+	if (!res)
 		return (NULL);
-	while (*s1)
-		*(res++) = *(s1++);
-	while (*s2)
-		*(res++) = *(s2++);
-	res[size] = '\0';
-	return (res);
+	start = res;
+	if (s1)
+		while (*s1)
+			*(res++) = *(s1++);
+	if (s2)
+		while (*s2)
+			*(res++) = *(s2++);
+	*res = '\0';
+	return (start);
 }
 
 void	*ft_memset(void *b, int c, size_t len)
@@ -71,14 +77,13 @@ void	*ft_memset(void *b, int c, size_t len)
 
 void	*ft_calloc(size_t count, size_t size)
 {
-	size_t	total;
 	void	*ptr;
 
-	total = count * size;
-	if (count && total / count != size)
+	if (count == 0 || size == 0)
+		return (malloc(1));
+	ptr = malloc(count * size);
+	if (!ptr)
 		return (NULL);
-	ptr = malloc(total);
-	if (ptr)
-		ft_memset(ptr, 0, total);
+	ft_memset(ptr, 0, count * size);
 	return (ptr);
 }
